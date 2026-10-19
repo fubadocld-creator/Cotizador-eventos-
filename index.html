@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Cotizador de Eventos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<style>
+/* Layout: white pages like the "Boda CST" deck — centered serif headings, grey price cards with bronze rules, blush footer bands; quote ticket sticky at right, stacked on phones. Single light look on purpose, matching the deck. */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --page:#ffffff; --card:#ecebe9; --ink:#1b1715; --muted:#6e625c; --line:#e3dcd8;
+  --bronze:#a6823d; --blush:#efd6cb; --terra:#d8a690; --brick:#7f3a2c; --on-dark:#fbf3ef;
+  --display:"Gilda Display", "Didot", "Bodoni 72", Georgia, serif;
+  --body:"Cormorant Garamond", "Garamond", Georgia, serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;font-weight:500;line-height:1.45;font-variant-numeric:lining-nums}
+.wrap{max-width:1200px;margin:0 auto;padding-block:36px 120px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:20px 32px;margin-bottom:8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.4vw,54px);line-height:1.05;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:10px 0 0;max-width:52ch}
+.band{background:var(--blush);display:flex;justify-content:flex-end;padding:12px 28px;margin:24px 0 40px 8%;font-size:17px}
+.guests{display:flex;flex-direction:column;align-items:center;gap:6px}
+.guests label,.subhead,.ticket .eyebrow{font-family:var(--body);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--bronze)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--bronze);background:var(--page);color:var(--bronze);font:500 20px/1 var(--body);cursor:pointer}
+.stepper button:hover{background:var(--blush)}
+.stepper input{width:84px;text-align:center;font:400 30px var(--display);border:none;border-bottom:1px solid var(--bronze);background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:40px;align-items:start}
+.options{display:flex;flex-direction:column;gap:56px;min-width:0}
+section > h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,4vw,40px);text-align:center;margin:0;line-height:1.1}
+section > .note{color:var(--bronze);text-align:center;font-size:19px;margin:6px 0 20px}
+.subhead{text-align:center;margin:28px 0 14px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:22px 18px 20px;background:var(--card);border:2px solid transparent;border-radius:18px;cursor:pointer;transition:border-color .15s, background .15s, transform .15s}
+.tile:hover{transform:translateY(-2px)}
+.tile input{position:absolute;opacity:0;pointer-events:none}
+.tile .name{font-family:var(--display);font-size:25px;line-height:1.1;text-wrap:balance}
+.tile .rule{position:relative;width:78%;height:1.5px;background:var(--bronze)}
+.tile .rule::before,.tile .rule::after{content:"";position:absolute;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--bronze)}
+.tile .rule::before{left:-2px}.tile .rule::after{right:-2px}
+.tile .price{font-family:var(--display);color:var(--bronze);font-size:30px;line-height:1;font-variant-numeric:lining-nums}
+.tile .price small{font-size:.75em}
+.tile .desc{font-style:italic;font-size:16px;color:var(--ink);line-height:1.2}
+.tile .detail{font-size:16px;color:var(--muted)}
+.tile:has(input:checked){background:var(--blush);border-color:var(--terra)}
+.tile:has(input:checked)::after{content:"Seleccionado";position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--brick);color:var(--on-dark);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.tile:has(input:focus-visible){outline:2px solid var(--brick);outline-offset:3px}
+.tile.none{background:transparent;border:1.5px dashed var(--line);justify-content:center}
+.tile.none .name{font-size:21px;color:var(--muted)}
+.tile.none:has(input:checked){background:var(--page);border-color:var(--terra);border-style:solid}
+
+.extra{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px 20px;margin-top:18px;padding:16px 20px;background:var(--blush)}
+.extra label{font-family:var(--display);font-size:21px}
+.extra .hint{color:var(--muted);font-size:17px}
+.extra .stepper input{font-size:24px;width:64px;border-bottom-color:var(--brick)}
+.extra .stepper button{background:transparent}
+
+.ticket{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 20px);background:var(--page);border:1px solid var(--line);min-width:0;overflow:hidden}
+.ticket-head{background:var(--brick);color:var(--on-dark);padding:18px 22px 16px;text-align:center}
+.ticket-head h2{font-family:var(--display);font-weight:400;font-size:30px;margin:0;letter-spacing:.02em}
+.ticket-head .meta{font-size:17px;opacity:.85;margin:2px 0 0}
+.ticket-body{padding:8px 22px 0}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lines li{display:grid;grid-template-columns:1fr auto;gap:0 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.lines .l-name{font-weight:700;font-size:18px}
+.lines .l-detail{grid-column:1;color:var(--muted);font-size:16px;font-style:italic}
+.lines .l-amt{grid-row:1 / span 2;grid-column:2;font-variant-numeric:tabular-nums lining-nums;font-weight:600;align-self:center}
+.lines .empty{display:block;color:var(--muted);font-style:italic}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding-top:16px}
+.total span{font-family:var(--display);font-size:24px}
+.total strong{font-family:var(--display);font-weight:400;font-size:36px;color:var(--bronze);font-variant-numeric:tabular-nums lining-nums}
+.pp{display:flex;justify-content:space-between;color:var(--muted);font-size:17px;font-variant-numeric:tabular-nums lining-nums}
+.actions{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:12px;font:700 15px var(--body);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none}
+.btn.primary{background:var(--terra);color:var(--ink)}
+.btn.primary:hover{background:#cf9880}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn:focus-visible,.stepper button:focus-visible{outline:2px solid var(--brick);outline-offset:2px}
+.toast{min-height:22px;font-size:16px;color:var(--brick);margin-top:8px;font-style:italic}
+textarea#copyFallback{width:100%;height:150px;margin-top:6px;font:13px ui-monospace,monospace;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.ticket-foot{background:var(--blush);text-align:right;padding:10px 22px;margin-top:14px;font-size:16px}
+
+.bar{display:none}
+@media (max-width:880px){
+  header{grid-template-columns:minmax(0,1fr)}
+  .guests{align-items:flex-start}
+  .band{margin-left:0}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .ticket{position:static}
+  .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;justify-content:space-between;align-items:center;gap:12px;
+    background:var(--brick);color:var(--on-dark);
+    padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+    padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .bar .lbl{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .bar strong{font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums lining-nums}
+  .bar a{color:var(--on-dark);font-size:17px}
+}
+@media (max-width:440px){.tiles{grid-template-columns:1fr 1fr;gap:12px}.tile{padding:18px 10px 16px}.tile .name{font-size:20px}.tile .price{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Cotizador de eventos</h1>
+      <p class="sub">Elige comida, barra libre, DJ y mobiliario. El total se calcula al momento con el número de invitados (mínimo 20).</p>
+    </div>
+    <div class="guests">
+      <label for="guests">Invitados</label>
+      <div class="stepper">
+        <button type="button" data-step="guests" data-d="-1" aria-label="Quitar 1 invitado">−</button>
+        <input id="guests" type="number" min="20" step="1" value="100" inputmode="numeric">
+        <button type="button" data-step="guests" data-d="1" aria-label="Agregar 1 invitado">+</button>
+      </div>
+    </div>
+  </header>
+  <div class="band">Cotización</div>
+
+  <div class="grid">
+    <form class="options" id="opts" onsubmit="return false">
+      <section>
+        <h2>Comida</h2>
+        <p class="note">Precio por persona</p>
+        <div class="tiles" id="food"></div>
+        <div class="subhead">Canapés</div>
+        <div class="tiles" id="canapes"></div>
+      </section>
+
+      <section>
+        <h2>Barra libre</h2>
+        <p class="note">Precio por persona</p>
+        <div class="tiles" id="barra"></div>
+      </section>
+
+      <section>
+        <h2>Meseros adicionales</h2>
+        <p class="note">$950 por mesero</p>
+        <div class="extra">
+          <label for="waiters">Meseros</label>
+          <div class="stepper">
+            <button type="button" data-step="waiters" data-d="-1" aria-label="Quitar mesero">−</button>
+            <input id="waiters" type="number" min="0" step="1" value="0" inputmode="numeric">
+            <button type="button" data-step="waiters" data-d="1" aria-label="Agregar mesero">+</button>
+          </div>
+          <span class="hint">× $950</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>DJ</h2>
+        <p class="note">Precio por paquete · hora extra según el paquete</p>
+        <div class="tiles" id="dj"></div>
+        <div class="extra" id="djExtraBox">
+          <label for="djHours">Horas extra</label>
+          <div class="stepper">
+            <button type="button" data-step="djHours" data-d="-1" aria-label="Quitar hora extra">−</button>
+            <input id="djHours" type="number" min="0" step="1" value="0" inputmode="numeric">
+            <button type="button" data-step="djHours" data-d="1" aria-label="Agregar hora extra">+</button>
+          </div>
+          <span class="hint" id="djHint"></span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Mobiliario</h2>
+        <p class="note">Precio por persona</p>
+        <div class="subhead">Periqueras</div>
+        <div class="tiles" id="periqueras"></div>
+        <div class="subhead">Mesas</div>
+        <div class="tiles" id="mesas"></div>
+      </section>
+    </form>
+
+    <aside class="ticket" id="ticket" aria-live="polite">
+      <div class="ticket-head">
+        <h2>Tu cotización</h2>
+        <p class="meta" id="meta"></p>
+      </div>
+      <div class="ticket-body">
+      <ul class="lines" id="lines"></ul>
+      <div class="total"><span>Total</span><strong id="total">$0</strong></div>
+      <div class="pp"><span>Por invitado</span><span id="perPerson">$0</span></div>
+      <div class="actions">
+        <button type="button" class="btn primary" id="copy">Copiar cotización</button>
+        <button type="button" class="btn ghost" id="reset">Limpiar</button>
+      </div>
+      <div class="toast" id="toast"></div>
+      <textarea id="copyFallback" readonly hidden aria-label="Texto de la cotización"></textarea>
+      </div>
+      <div class="ticket-foot">Precios en pesos mexicanos</div>
+    </aside>
+  </div>
+</div>
+
+<div class="bar"><div><div class="lbl">Total</div><strong id="barTotal">$0</strong></div><a href="#ticket">Ver detalle</a></div>
+
+<script>
+const CATALOG = {
+  food: [
+    {id:"taquiza", name:"Taquiza", price:200},
+    {id:"taquiza-premium", name:"Taquiza premium", price:280},
+    {id:"silver", name:"Menú dos tiempos", tier:"Silver", price:300},
+    {id:"gold", name:"Menú tres tiempos", tier:"Gold", price:370},
+    {id:"platino", name:"Menú cuatro tiempos", tier:"Platino", price:420},
+  ],
+  canapes: [
+    {id:"c-silver", name:"Canapés Silver", tier:"Silver", price:250, desc:"Canapés · 5 por persona"},
+    {id:"c-gold", name:"Canapés Gold", tier:"Gold", price:300, desc:"Canapés"},
+    {id:"c-platino", name:"Canapés Platino", tier:"Platino", price:400, desc:"Canapés"},
+  ],
+  barra: [
+    {id:"b-esencial", name:"Barra libre Esencial", price:320},
+    {id:"b-plus", name:"Barra libre Plus", price:410},
+  ],
+  dj: [
+    {id:"light", name:"DJ Light", price:4600, extra:850},
+    {id:"complete", name:"DJ Complete", price:7000, extra:1100},
+    {id:"elite", name:"DJ Elite", price:9060, extra:1300},
+    {id:"elite-plus", name:"DJ Elite Plus", price:11700, extra:null},
+  ],
+  periqueras: [
+    {id:"p-silver", name:"Periqueras Silver", tier:"Silver", price:117},
+    {id:"p-gold", name:"Periqueras Gold", tier:"Gold", price:150},
+    {id:"p-platino", name:"Periqueras Platino", tier:"Platino", price:210},
+  ],
+  mesas: [
+    {id:"m-vintage-rect", name:"Vintage rectangular", price:87},
+    {id:"m-vintage", name:"Vintage", price:96},
+    {id:"m-cuadrada", name:"Cuadrada nogal", price:102},
+    {id:"m-campirana", name:"Campirana nogal", price:132},
+    {id:"m-rustica", name:"Rústica", price:160},
+  ],
+};
+const PER_PERSON = {food:true, canapes:true, barra:true, periqueras:true, mesas:true, dj:false};
+const WAITER = 950;
+const DEFAULTS = {food:"taquiza-premium", canapes:"", barra:"", dj:"complete", periqueras:"p-gold", mesas:"", guests:100, waiters:0, djHours:0};
+
+const $ = id => document.getElementById(id);
+const fmt = n => "$" + Math.round(n).toLocaleString("es-MX");
+
+function buildGroup(key){
+  const box = $(key);
+  const none = `<label class="tile none"><input type="radio" name="${key}" id="${key}-none" value=""><span class="name">Sin ${key==="dj"?"DJ":"seleccionar"}</span></label>`;
+  box.innerHTML = none + CATALOG[key].map(o => {
+    const title = o.tier || o.name.replace(/^(DJ|Barra libre) /, "");
+    const desc = o.desc || (o.tier ? o.name.replace(/ (Silver|Gold|Platino)$/, "") : (key==="dj" ? "DJ" : key==="barra" ? "Barra libre" : key==="mesas" ? "Mesa" : ""));
+    const detail = key==="dj" ? (o.extra ? `Hora extra ${fmt(o.extra)}` : "Sin hora extra") : "";
+    return `
+    <label class="tile"><input type="radio" name="${key}" id="${key}-${o.id}" value="${o.id}">
+      <span class="name">${title}</span>
+      <span class="rule"></span>
+      <span class="price">${fmt(o.price)}${PER_PERSON[key] ? " <small>p/p</small>" : ""}</span>
+      ${desc ? `<span class="desc">${desc}</span>` : ""}
+      ${detail ? `<span class="detail">${detail}</span>` : ""}
+    </label>`;
+  }).join("");
+}
+Object.keys(CATALOG).forEach(buildGroup);
+
+function applyDefaults(){
+  for (const k of Object.keys(CATALOG)) {
+    const el = document.querySelector(`input[name="${k}"][value="${DEFAULTS[k]}"]`);
+    if (el) el.checked = true;
+  }
+  $("guests").value = DEFAULTS.guests; $("waiters").value = DEFAULTS.waiters; $("djHours").value = DEFAULTS.djHours;
+}
+applyDefaults();
+
+const pick = k => { const v = document.querySelector(`input[name="${k}"]:checked`)?.value; return CATALOG[k].find(o => o.id === v) || null; };
+const intVal = (id, min) => { const n = Math.max(min, Math.floor(Number($(id).value) || 0)); return n; };
+
+let lastText = "";
+function render(){
+  const guests = intVal("guests", 20);
+  const waiters = intVal("waiters", 0);
+  const items = [];
+
+  for (const k of ["food","canapes","barra"]) {
+    const o = pick(k);
+    if (o) items.push({name: (o.tier ? o.tier + " · " : "") + o.name, detail: `${guests} × ${fmt(o.price)}`, amt: guests * o.price});
+  }
+  if (waiters) items.push({name:"Meseros adicionales", detail:`${waiters} × ${fmt(WAITER)}`, amt: waiters * WAITER});
+
+  const dj = pick("dj");
+  const box = $("djExtraBox");
+  if (dj && dj.extra) {
+    box.hidden = false; $("djHint").textContent = `× ${fmt(dj.extra)} (${dj.name})`;
+  } else {
+    box.hidden = true; $("djHours").value = 0;
+  }
+  const djHours = intVal("djHours", 0);
+  if (dj) {
+    items.push({name: dj.name, detail:"Paquete", amt: dj.price});
+    if (djHours && dj.extra) items.push({name:"Horas extra de DJ", detail:`${djHours} × ${fmt(dj.extra)}`, amt: djHours * dj.extra});
+  }
+  for (const k of ["periqueras","mesas"]) {
+    const o = pick(k);
+    if (o) items.push({name: k==="mesas" ? "Mesa " + o.name.toLowerCase() : o.name, detail:`${guests} × ${fmt(o.price)}`, amt: guests * o.price});
+  }
+
+  const total = items.reduce((s,i) => s + i.amt, 0);
+  $("meta").textContent = `${guests} invitados`;
+  $("lines").innerHTML = items.length
+    ? items.map(i => `<li><span class="l-name">${i.name}</span><span class="l-amt">${fmt(i.amt)}</span><span class="l-detail">${i.detail}</span></li>`).join("")
+    : `<li><span class="empty">Aún no eliges nada. Selecciona una opción a la izquierda.</span></li>`;
+
+
+  $("total").textContent = fmt(total);
+  $("barTotal").textContent = fmt(total);
+  $("perPerson").textContent = fmt(total / guests);
+
+  lastText = [
+    `COTIZACIÓN · ${guests} invitados`,
+    ...items.map(i => `- ${i.name} (${i.detail}): ${fmt(i.amt)}`),
+    `TOTAL: ${fmt(total)} MXN`,
+    `Por invitado: ${fmt(total / guests)}`,
+  ].filter(Boolean).join("\n");
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-step]");
+  if (!b) return;
+  const input = $(b.dataset.step);
+  const min = Number(input.min) || 0;
+  input.value = Math.max(min, (Number(input.value) || 0) + Number(b.dataset.d));
+  render();
+});
+$("opts").addEventListener("change", render);
+$("opts").addEventListener("input", render);
+$("guests").addEventListener("input", render);
+$("guests").addEventListener("blur", () => { $("guests").value = intVal("guests", 20); render(); });
+
+$("reset").addEventListener("click", () => {
+  for (const k of Object.keys(CATALOG)) $(`${k}-none`).checked = true;
+  $("waiters").value = 0; $("djHours").value = 0;
+  $("copyFallback").hidden = true; $("toast").textContent = "";
+  render();
+});
+$("copy").addEventListener("click", () => {
+  const show = () => { const t = $("copyFallback"); t.value = lastText; t.hidden = false; t.select(); $("toast").textContent = "Selecciona y copia el texto."; };
+  try {
+    navigator.clipboard.writeText(lastText).then(() => { $("toast").textContent = "Cotización copiada."; $("copyFallback").hidden = true; }, show);
+  } catch { show(); }
+});
+
+render();
+</script>
+
+</body>
+</html>

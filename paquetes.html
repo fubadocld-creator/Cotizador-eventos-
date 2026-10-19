@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Paquetes Todo Incluido</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<style>
+/* Layout: white pages like the "Boda CST" deck — centered serif headings, grey price cards with bronze rules, blush footer bands; quote ticket sticky at right, stacked on phones. Single light look on purpose, matching the deck. */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --page:#ffffff; --card:#ecebe9; --ink:#1b1715; --muted:#6e625c; --line:#e3dcd8;
+  --bronze:#a6823d; --blush:#efd6cb; --terra:#d8a690; --brick:#7f3a2c; --on-dark:#fbf3ef;
+  --display:"Gilda Display", "Didot", "Bodoni 72", Georgia, serif;
+  --body:"Cormorant Garamond", "Garamond", Georgia, serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;font-weight:500;line-height:1.45;font-variant-numeric:lining-nums}
+.wrap{max-width:1200px;margin:0 auto;padding-block:36px 120px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:20px 32px;margin-bottom:8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.4vw,54px);line-height:1.05;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:10px 0 0;max-width:52ch}
+.band{background:var(--blush);display:flex;justify-content:flex-end;padding:12px 28px;margin:24px 0 40px 8%;font-size:17px}
+.guests{display:flex;flex-direction:column;align-items:center;gap:6px}
+.guests label,.subhead,.ticket .eyebrow{font-family:var(--body);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--bronze)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--bronze);background:var(--page);color:var(--bronze);font:500 20px/1 var(--body);cursor:pointer}
+.stepper button:hover{background:var(--blush)}
+.stepper input{width:84px;text-align:center;font:400 30px var(--display);border:none;border-bottom:1px solid var(--bronze);background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:40px;align-items:start}
+.options{display:flex;flex-direction:column;gap:56px;min-width:0}
+section > h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,4vw,40px);text-align:center;margin:0;line-height:1.1}
+section > .note{color:var(--bronze);text-align:center;font-size:19px;margin:6px 0 20px}
+.subhead{text-align:center;margin:28px 0 14px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:22px 18px 20px;background:var(--card);border:2px solid transparent;border-radius:18px;cursor:pointer;transition:border-color .15s, background .15s, transform .15s}
+.tile:hover{transform:translateY(-2px)}
+.tile input{position:absolute;opacity:0;pointer-events:none}
+.tile .name{font-family:var(--display);font-size:25px;line-height:1.1;text-wrap:balance}
+.tile .rule{position:relative;width:78%;height:1.5px;background:var(--bronze)}
+.tile .rule::before,.tile .rule::after{content:"";position:absolute;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--bronze)}
+.tile .rule::before{left:-2px}.tile .rule::after{right:-2px}
+.tile .price{font-family:var(--display);color:var(--bronze);font-size:30px;line-height:1;font-variant-numeric:lining-nums}
+.tile .price small{font-size:.75em}
+.tile .desc{font-style:italic;font-size:16px;color:var(--ink);line-height:1.2}
+.tile .detail{font-size:16px;color:var(--muted)}
+.tile:has(input:checked){background:var(--blush);border-color:var(--terra)}
+.tile:has(input:checked)::after{content:"Seleccionado";position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--brick);color:var(--on-dark);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.tile:has(input:focus-visible){outline:2px solid var(--brick);outline-offset:3px}
+.tile.none{background:transparent;border:1.5px dashed var(--line);justify-content:center}
+.tile.none .name{font-size:21px;color:var(--muted)}
+.tile.none:has(input:checked){background:var(--page);border-color:var(--terra);border-style:solid}
+
+.extra{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px 20px;margin-top:18px;padding:16px 20px;background:var(--blush)}
+.extra label{font-family:var(--display);font-size:21px}
+.extra .hint{color:var(--muted);font-size:17px}
+.extra .stepper input{font-size:24px;width:64px;border-bottom-color:var(--brick)}
+.extra .stepper button{background:transparent}
+
+.ticket{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 20px);background:var(--page);border:1px solid var(--line);min-width:0;overflow:hidden}
+.ticket-head{background:var(--brick);color:var(--on-dark);padding:18px 22px 16px;text-align:center}
+.ticket-head h2{font-family:var(--display);font-weight:400;font-size:30px;margin:0;letter-spacing:.02em}
+.ticket-head .meta{font-size:17px;opacity:.85;margin:2px 0 0}
+.ticket-body{padding:8px 22px 0}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lines li{display:grid;grid-template-columns:1fr auto;gap:0 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.lines .l-name{font-weight:700;font-size:18px}
+.lines .l-detail{grid-column:1;color:var(--muted);font-size:16px;font-style:italic}
+.lines .l-amt{grid-row:1 / span 2;grid-column:2;font-variant-numeric:tabular-nums lining-nums;font-weight:600;align-self:center}
+.lines .empty{display:block;color:var(--muted);font-style:italic}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding-top:16px}
+.total span{font-family:var(--display);font-size:24px}
+.total strong{font-family:var(--display);font-weight:400;font-size:36px;color:var(--bronze);font-variant-numeric:tabular-nums lining-nums}
+.pp{display:flex;justify-content:space-between;color:var(--muted);font-size:17px;font-variant-numeric:tabular-nums lining-nums}
+.actions{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:12px;font:700 15px var(--body);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none}
+.btn.primary{background:var(--terra);color:var(--ink)}
+.btn.primary:hover{background:#cf9880}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn:focus-visible,.stepper button:focus-visible{outline:2px solid var(--brick);outline-offset:2px}
+.toast{min-height:22px;font-size:16px;color:var(--brick);margin-top:8px;font-style:italic}
+textarea#copyFallback{width:100%;height:150px;margin-top:6px;font:13px ui-monospace,monospace;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.ticket-foot{background:var(--blush);text-align:right;padding:10px 22px;margin-top:14px;font-size:16px}
+
+.bar{display:none}
+@media (max-width:880px){
+  header{grid-template-columns:minmax(0,1fr)}
+  .guests{align-items:flex-start}
+  .band{margin-left:0}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .ticket{position:static}
+  .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;justify-content:space-between;align-items:center;gap:12px;
+    background:var(--brick);color:var(--on-dark);
+    padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+    padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .bar .lbl{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .bar strong{font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums lining-nums}
+  .bar a{color:var(--on-dark);font-size:17px}
+}
+@media (max-width:440px){.tiles{grid-template-columns:1fr 1fr;gap:12px}.tile{padding:18px 10px 16px}.tile .name{font-size:20px}.tile .price{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<style>
+/* Additions for the package quoter: editable rows for menu extras and general extras */
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 140px 36px;gap:10px 14px;align-items:end;background:var(--card);border-radius:14px;padding:12px 16px}
+.row.three{grid-template-columns:minmax(0,1fr) 130px 90px 36px}
+.field{display:flex;flex-direction:column;gap:2px;min-width:0}
+.field span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--bronze)}
+.field input{width:100%;font:500 18px var(--body);color:var(--ink);background:transparent;border:none;border-bottom:1px solid var(--bronze);padding:4px 0;font-variant-numeric:lining-nums}
+.field input:focus{outline:none;border-bottom:2px solid var(--brick)}
+.money{position:relative}
+.money::before{content:"$";position:absolute;left:0;bottom:6px;color:var(--muted)}
+.money input{padding-left:12px}
+.remove{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--page);color:var(--muted);font:500 20px/1 var(--body);cursor:pointer}
+.remove:hover{border-color:var(--brick);color:var(--brick)}
+.add{align-self:center;margin-top:14px;background:transparent;border:1px solid var(--bronze);color:var(--bronze);font:700 14px var(--body);letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;border-radius:999px;cursor:pointer}
+.add:hover{background:var(--blush);color:var(--ink)}
+.add-wrap{display:flex;justify-content:center}
+.custom{margin-top:18px}
+.custom .field{width:170px}
+.custom .field input{font-size:22px;text-align:center}
+.custom select{font:600 17px var(--body);color:var(--ink);background:var(--page);border:1px solid var(--bronze);border-radius:999px;padding:6px 14px;cursor:pointer}
+.lines li.discount .l-amt,.lines li.discount .l-name{color:var(--brick)}
+.remove:focus-visible,.add:focus-visible{outline:2px solid var(--brick);outline-offset:2px}
+@media (max-width:560px){
+  .row,.row.three{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px}
+  .row .field.name{grid-column:1 / -1}
+  .row:not(.three) .field.price{grid-column:1 / 3}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Paquetes todo incluido</h1>
+      <p class="sub">Elige el paquete y el montaje, agrega complementos y extras. El total se calcula al momento con el número de invitados (paquetes a partir de 80 personas).</p>
+    </div>
+    <div class="guests">
+      <label for="guests">Invitados</label>
+      <div class="stepper">
+        <button type="button" data-step="guests" data-d="-1" aria-label="Quitar 1 invitado">−</button>
+        <input id="guests" type="number" min="80" step="1" value="100" inputmode="numeric">
+        <button type="button" data-step="guests" data-d="1" aria-label="Agregar 1 invitado">+</button>
+      </div>
+    </div>
+  </header>
+  <div class="band">Cotización de paquetes</div>
+
+  <div class="grid">
+    <form class="options" id="opts" onsubmit="return false">
+      <section>
+        <h2>Paquete</h2>
+        <p class="note">Precio por persona · desde montaje formal</p>
+        <div class="tiles" id="pkg"></div>
+      </section>
+
+      <section>
+        <h2>Montaje</h2>
+        <p class="note" id="montajeNote">Precio por persona del paquete elegido</p>
+        <div class="tiles" id="montaje"></div>
+        <div class="extra custom" id="customBox" hidden>
+          <label for="customPrice">Precio personalizado</label>
+          <div class="field money"><input id="customPrice" type="number" min="0" step="10" inputmode="numeric" aria-label="Precio personalizado por persona"></div>
+          <span class="hint" id="customHint"></span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Extras del menú</h2>
+        <p class="note">Cobro adicional por persona</p>
+        <div class="rows" id="menuRows"></div>
+        <div class="add-wrap"><button type="button" class="add" id="addMenu">+ Agregar extra de menú</button></div>
+      </section>
+
+      <section>
+        <h2>DJ</h2>
+        <p class="note">Audio básico incluido · los paquetes de DJ son un cargo extra</p>
+        <div class="tiles" id="dj"></div>
+      </section>
+
+      <section>
+        <h2>Complementos</h2>
+        <p class="note">Precio por persona</p>
+        <div class="subhead">Barra libre</div>
+        <div class="tiles" id="barra"></div>
+        <div class="subhead">Mesa de postres</div>
+        <div class="tiles" id="postres"></div>
+        <div class="subhead">Mesa de dulces</div>
+        <div class="tiles" id="dulces"></div>
+        <div class="subhead">Bienvenida</div>
+        <div class="tiles" id="bienvenida"></div>
+      </section>
+
+      <section>
+        <h2>Ceremonia</h2>
+        <p class="note">Precio general, no por persona</p>
+        <div class="tiles" id="ceremonia"></div>
+      </section>
+
+      <section>
+        <h2>Extras</h2>
+        <p class="note">Escribe el concepto, el precio y la cantidad</p>
+        <div class="rows" id="extraRows"></div>
+        <div class="add-wrap"><button type="button" class="add" id="addExtra">+ Agregar extra</button></div>
+      </section>
+    </form>
+
+    <aside class="ticket" id="ticket" aria-live="polite">
+      <div class="ticket-head">
+        <h2>Tu cotización</h2>
+        <p class="meta" id="meta"></p>
+      </div>
+      <div class="ticket-body">
+      <ul class="lines" id="lines"></ul>
+      <div class="total"><span>Total</span><strong id="total">$0</strong></div>
+      <div class="pp"><span>Por invitado</span><span id="perPerson">$0</span></div>
+      <div class="actions">
+        <button type="button" class="btn primary" id="copy">Copiar cotización</button>
+        <button type="button" class="btn ghost" id="reset">Limpiar</button>
+      </div>
+      <div class="toast" id="toast"></div>
+      <textarea id="copyFallback" readonly hidden aria-label="Texto de la cotización"></textarea>
+      </div>
+      <div class="ticket-foot">Precios en pesos mexicanos</div>
+    </aside>
+  </div>
+</div>
+
+<div class="bar"><div><div class="lbl">Total</div><strong id="barTotal">$0</strong></div><a href="#ticket">Ver detalle</a></div>
+
+<script>
+const MONTAJES = [
+  {id:"formal", name:"Formal", desc:"Montaje formal"},
+  {id:"vintage", name:"Vintage", desc:"Montaje vintage"},
+  {id:"personalizado", name:"Personalizado", desc:"Montaje personalizado", from:true},
+];
+const PAQUETES = [
+  {id:"taquiza", name:"Taquiza", prices:{formal:880, vintage:970, personalizado:1110}},
+  {id:"taquiza-premium", name:"Taquiza premium", prices:{formal:910, vintage:1000, personalizado:1140}},
+  {id:"silver", name:"Silver", desc:"Comida dos tiempos", prices:{formal:850, vintage:940, personalizado:1070}},
+  {id:"gold", name:"Gold", desc:"Comida tres tiempos", prices:{formal:990, vintage:1080, personalizado:1180}},
+  {id:"platino", name:"Platino", desc:"Comida cuatro tiempos", prices:{formal:1150, vintage:1270, personalizado:1370}},
+  {id:"buffet", name:"Buffet", prices:{formal:1200, vintage:1300, personalizado:1400}},
+  {id:"parrillada", name:"Parrillada", prices:{formal:1250, vintage:1350, personalizado:1450}},
+];
+// unit: "pp" = por persona, "flat" = precio general, "extra" = cargo extra al paquete
+const GROUPS = {
+  dj: {label:"DJ", unit:"extra", none:{title:"Audio básico", desc:"Incluido en el paquete"}, options:[
+    {id:"light", title:"DJ Light", price:4500},
+    {id:"complete", title:"DJ Complete", price:6650},
+    {id:"elite", title:"DJ Elite", price:8950},
+    {id:"elite-plus", title:"DJ Elite Plus", price:10400},
+  ]},
+  barra: {label:"Barra libre", unit:"pp", options:[
+    {id:"esencial", title:"Esencial", price:320},
+    {id:"plus", title:"Plus", price:410},
+  ]},
+  postres: {label:"Mesa de postres", unit:"pp", editable:true, options:[
+    {id:"esencial", title:"Esencial", price:100},
+    {id:"plus", title:"Plus", price:170},
+  ]},
+  dulces: {label:"Mesa de dulces", unit:"pp", editable:true, options:[
+    {id:"esencial", title:"Esencial", price:80},
+    {id:"plus", title:"Plus", price:150},
+  ]},
+  bienvenida: {label:"Bienvenida", unit:"pp", options:[
+    {id:"esencial", title:"Esencial", price:80},
+    {id:"plus", title:"Plus", price:110},
+    {id:"imperial", title:"Imperial", price:130},
+  ]},
+  ceremonia: {label:"Ceremonia", unit:"flat", none:{title:"Sin ceremonia"}, options:[
+    {id:"ceremonia", title:"Ceremonia", price:8500, desc:"Precio general"},
+  ]},
+};
+const MIN_GUESTS = 80;
+const $ = id => document.getElementById(id);
+const fmt = n => "$" + Math.round(n).toLocaleString("es-MX");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function tile(name, id, value, title, price, unit, desc){
+  const suffix = unit==="pp" ? " <small>p/p</small>" : "";
+  const prefix = unit==="extra" ? "+" : "";
+  return `<label class="tile"><input type="radio" name="${name}" id="${id}" value="${value}">
+    <span class="name">${title}</span><span class="rule"></span>
+    <span class="price">${prefix}${fmt(price)}${suffix}</span>
+    ${desc ? `<span class="desc">${desc}</span>` : ""}</label>`;
+}
+
+$("pkg").innerHTML = PAQUETES.map(p => tile("pkg", `pkg-${p.id}`, p.id, p.name, p.prices.formal, "pp", (p.desc ? p.desc + " · " : "") + "desde")).join("");
+
+function buildMontajes(){
+  const p = pickPkg();
+  const cur = document.querySelector('input[name="montaje"]:checked')?.value || "formal";
+  $("montaje").innerHTML = MONTAJES.map(m => {
+    const price = p.prices[m.id];
+    return `<label class="tile"><input type="radio" name="montaje" id="montaje-${m.id}" value="${m.id}">
+      <span class="name">${m.name}</span><span class="rule"></span>
+      <span class="price">${m.from ? "<small>desde</small> " : ""}${fmt(price)} <small>p/p</small></span>
+      <span class="desc">${p.name}</span></label>`;
+  }).join("");
+  $(`montaje-${cur}`).checked = true;
+  $("montajeNote").textContent = `Precio por persona del paquete ${p.name}`;
+}
+
+for (const [key, g] of Object.entries(GROUPS)) {
+  const none = g.none
+    ? `<label class="tile${g.none.desc ? "" : " none"}"><input type="radio" name="${key}" id="${key}-none" value=""><span class="name">${g.none.title}</span>${g.none.desc ? `<span class="rule"></span><span class="price">$0</span><span class="desc">${g.none.desc}</span>` : ""}</label>`
+    : `<label class="tile none"><input type="radio" name="${key}" id="${key}-none" value=""><span class="name">Sin ${g.label.toLowerCase()}</span></label>`;
+  $(key).innerHTML = none + g.options.map(o => tile(key, `${key}-${o.id}`, o.id, o.title, o.price, g.unit, o.desc || (g.unit==="extra" ? "Cargo extra" : ""))).join("");
+  if (g.editable) $(key).insertAdjacentHTML("afterend", `
+    <div class="extra custom" id="${key}Box" hidden>
+      <label for="${key}Price">Precio de ${g.label.toLowerCase()}</label>
+      <div class="field money"><input id="${key}Price" type="number" min="0" step="5" inputmode="numeric" aria-label="Precio por persona de ${g.label.toLowerCase()}"></div>
+      <span class="hint">p/p · puedes cambiarlo</span>
+    </div>`);
+}
+const lastSel = {};
+$("ceremonia").insertAdjacentHTML("afterend", `
+  <div class="extra custom" id="cerBox" hidden>
+    <label for="cerDesc">Descuento</label>
+    <div class="field"><input id="cerDesc" type="number" min="0" step="100" inputmode="numeric" placeholder="0" aria-label="Descuento en la ceremonia"></div>
+    <select id="cerTipo" aria-label="Tipo de descuento"><option value="pesos">en pesos</option><option value="pct">en %</option></select>
+    <span class="hint" id="cerHint"></span>
+  </div>`);
+
+let rowSeq = 0;
+function addRow(listId, three, data = {}){
+  const n = ++rowSeq;
+  const div = document.createElement("div");
+  div.className = "row" + (three ? " three" : "");
+  div.innerHTML = `
+    <label class="field name"><span>Concepto</span><input id="r${n}-name" type="text" placeholder="${three ? "Ej. Pista iluminada" : "Ej. Estación de café"}" value="${esc(data.name || "")}"></label>
+    <label class="field price money"><span>${three ? "Precio" : "Precio p/p"}</span><input id="r${n}-price" type="number" min="0" step="10" inputmode="numeric" placeholder="0" value="${data.price ?? ""}"></label>
+    ${three ? `<label class="field qty"><span>Cantidad</span><input id="r${n}-qty" type="number" min="1" step="1" inputmode="numeric" value="${data.qty ?? 1}"></label>` : ""}
+    <button type="button" class="remove" aria-label="Quitar este extra">×</button>`;
+  div.querySelector(".remove").addEventListener("click", () => { div.remove(); render(); });
+  $(listId).appendChild(div);
+  return div;
+}
+const readRows = listId => [...$(listId).querySelectorAll(".row")].map(r => ({
+  name: r.querySelector(".name input").value.trim(),
+  price: Math.max(0, Number(r.querySelector(".price input").value) || 0),
+  qty: r.querySelector(".qty input") ? Math.max(0, Math.floor(Number(r.querySelector(".qty input").value) || 0)) : 1,
+})).filter(r => r.price > 0);
+
+const pickPkg = () => PAQUETES.find(p => p.id === document.querySelector('input[name="pkg"]:checked')?.value) || PAQUETES[0];
+const pickGroup = k => GROUPS[k].options.find(o => o.id === document.querySelector(`input[name="${k}"]:checked`)?.value) || null;
+const intVal = (id, min) => Math.max(min, Math.floor(Number($(id).value) || 0));
+
+function applyDefaults(){
+  $("pkg-taquiza").checked = true;
+  for (const k of Object.keys(GROUPS)) $(`${k}-none`).checked = true;
+  $("guests").value = 100;
+  $("menuRows").innerHTML = ""; $("extraRows").innerHTML = "";
+  addRow("menuRows", false); addRow("extraRows", true);
+  document.querySelectorAll('input[name="montaje"]').forEach(i => i.checked = false);
+  buildMontajes();
+  $("montaje-formal").checked = true;
+  $("customPrice").value = "";
+  $("cerDesc").value = ""; $("cerTipo").value = "pesos";
+}
+
+let lastText = "";
+let lastPkg = null;
+function render(){
+  const guests = intVal("guests", MIN_GUESTS);
+  const p = pickPkg();
+  if (p !== lastPkg) { buildMontajes(); lastPkg = p; $("customPrice").value = ""; }
+  const mId = document.querySelector('input[name="montaje"]:checked')?.value || "formal";
+  const m = MONTAJES.find(x => x.id === mId);
+  const base = p.prices[mId];
+  let pp = base;
+  $("customBox").hidden = !m.from;
+  if (m.from) {
+    $("customPrice").min = base;
+    $("customPrice").placeholder = base;
+    $("customHint").textContent = `p/p · mínimo ${fmt(base)}`;
+    const c = Number($("customPrice").value);
+    if (c > base) pp = c;
+  }
+
+  const items = [{name:`Paquete ${p.name}`, detail:`Montaje ${m.name.toLowerCase()} · ${guests} × ${fmt(pp)}`, amt: guests * pp}];
+  for (const r of readRows("menuRows")) items.push({name: r.name || "Extra de menú", detail:`${guests} × ${fmt(r.price)}`, amt: guests * r.price});
+  $("cerBox").hidden = !pickGroup("ceremonia");
+  for (const [k, g] of Object.entries(GROUPS)) {
+    const o = pickGroup(k);
+    if (g.editable) {
+      $(`${k}Box`).hidden = !o;
+      if ((o && o.id) !== lastSel[k]) { lastSel[k] = o && o.id; $(`${k}Price`).value = o ? o.price : ""; }
+    }
+    if (!o) continue;
+    const price = g.editable ? Math.max(0, Number($(`${k}Price`).value) || 0) : o.price;
+    const title = g.unit==="pp" ? `${g.label} ${o.title}` : o.title;
+    if (g.unit==="pp") items.push({name:title, detail:`${guests} × ${fmt(price)}`, amt: guests * price});
+    else items.push({name:title, detail: g.unit==="extra" ? "Cargo extra" : "Precio general", amt: o.price});
+    if (k === "ceremonia") {
+      const v = Math.max(0, Number($("cerDesc").value) || 0);
+      const pct = $("cerTipo").value === "pct";
+      const off = Math.min(o.price, pct ? o.price * Math.min(v, 100) / 100 : v);
+      $("cerHint").textContent = off ? `Ceremonia queda en ${fmt(o.price - off)}` : `Precio normal ${fmt(o.price)}`;
+      if (off) items.push({name:"Descuento en ceremonia", detail: pct ? `${Math.min(v, 100)}% de ${fmt(o.price)}` : "Descuento", amt: -off, discount:true});
+    }
+  }
+  for (const r of readRows("extraRows")) if (r.qty) items.push({name: r.name || "Extra", detail:`${r.qty} × ${fmt(r.price)}`, amt: r.qty * r.price});
+
+  const total = items.reduce((s, i) => s + i.amt, 0);
+  $("meta").textContent = `${guests} invitados`;
+  $("lines").innerHTML = items.map(i => `<li${i.discount ? ' class="discount"' : ""}><span class="l-name">${esc(i.name)}</span><span class="l-amt">${i.amt < 0 ? "−" + fmt(-i.amt) : fmt(i.amt)}</span><span class="l-detail">${esc(i.detail)}</span></li>`).join("");
+  $("total").textContent = fmt(total);
+  $("barTotal").textContent = fmt(total);
+  $("perPerson").textContent = fmt(total / guests);
+
+  lastText = [
+    `COTIZACIÓN · ${guests} invitados`,
+    ...items.map(i => `- ${i.name} (${i.detail}): ${i.amt < 0 ? "-" + fmt(-i.amt) : fmt(i.amt)}`),
+    `TOTAL: ${fmt(total)} MXN`,
+    `Por invitado: ${fmt(total / guests)}`,
+  ].join("\n");
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-step]");
+  if (!b) return;
+  const input = $(b.dataset.step);
+  input.value = Math.max(Number(input.min) || 0, (Number(input.value) || 0) + Number(b.dataset.d));
+  render();
+});
+$("opts").addEventListener("change", render);
+$("opts").addEventListener("input", render);
+$("guests").addEventListener("input", render);
+$("guests").addEventListener("blur", () => { $("guests").value = intVal("guests", MIN_GUESTS); render(); });
+$("customPrice").addEventListener("blur", () => {
+  const p = pickPkg(), base = p.prices.personalizado, c = Number($("customPrice").value);
+  if ($("customPrice").value !== "" && c < base) $("customPrice").value = base;
+  render();
+});
+$("addMenu").addEventListener("click", () => { addRow("menuRows", false).querySelector("input").focus(); });
+$("addExtra").addEventListener("click", () => { addRow("extraRows", true).querySelector("input").focus(); });
+$("reset").addEventListener("click", () => {
+  applyDefaults(); lastPkg = pickPkg();
+  $("copyFallback").hidden = true; $("toast").textContent = "";
+  render();
+});
+$("copy").addEventListener("click", () => {
+  const show = () => { const t = $("copyFallback"); t.value = lastText; t.hidden = false; t.select(); $("toast").textContent = "Selecciona y copia el texto."; };
+  try {
+    navigator.clipboard.writeText(lastText).then(() => { $("toast").textContent = "Cotización copiada."; $("copyFallback").hidden = true; }, show);
+  } catch { show(); }
+});
+
+applyDefaults();
+lastPkg = pickPkg();
+render();
+</script>
+
+</body>
+</html>
